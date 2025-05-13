@@ -1,0 +1,22 @@
+{
+  "name": "Denia",
+  "markers": [
+    {
+      "title": "Puerto",
+      "description": "Puerto de denia",
+      "lat": 38.844086,
+      "lng": 0.11266,
+      "questions": [
+        {
+          "question": "De que color es el agua?",
+          "correctAnswer": "Azul",
+          "wrongAnswers": [
+            "Verde",
+            "Negra",
+            "Gris"
+          ]
+        }
+      ]
+    }
+  ]
+}

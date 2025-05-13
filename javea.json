@@ -1,0 +1,56 @@
+{
+  "name": "Jávea",
+  "markers": [
+    {
+      "title": "Instituto",
+      "description": ".",
+      "lat": 38.790854,
+      "lng": 0.170337,
+      "questions": [
+        {
+          "question": "Color de la fachada?",
+          "correctAnswer": "Blanco",
+          "wrongAnswers": [
+            "Rojo",
+            "Negro",
+            "Verde"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ruslan",
+      "description": "Casa pordiosera",
+      "lat": 38.78964993317405,
+      "lng": 0.1767683401380671,
+      "questions": [
+        {
+          "question": "Cuantas ventanas tiene?",
+          "correctAnswer": "0",
+          "wrongAnswers": [
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Museo",
+      "description": "museo",
+      "lat": 38.78770978275313,
+      "lng": 0.1736783857254487,
+      "questions": [
+        {
+          "question": "Cuanto mide el edificio?",
+          "correctAnswer": "2m",
+          "wrongAnswers": [
+            "22m",
+            "4m",
+            "4m"
+          ]
+        }
+      ]
+    }
+  ]
+}
