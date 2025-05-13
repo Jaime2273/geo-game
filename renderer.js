@@ -32,12 +32,10 @@ function initMap() {
 }
 
 // Cargar archivo JSON
+// Cargar archivo JSON automáticamente
 async function loadJsonFile() {
     try {
-        const filePath = await window.electronAPI.selectJsonFile();
-        if (!filePath) return;
-
-        const response = await fetch(filePath);
+        const response = await fetch('https://raw.githubusercontent.com/Jaime2273/geo-game/main/javea.json');
         const data = await response.json();
         
         markersData = data.markers || [];
@@ -45,14 +43,14 @@ async function loadJsonFile() {
         currentTargetIndex = -1;
         
         if (markersData.length > 0) {
-            gameStatus.textContent = `Archivo cargado: ${data.name} - ${markersData.length} puntos`;
+            gameStatus.textContent = `Juego cargado: ${data.name} - ${markersData.length} puntos`;
             startGame();
         } else {
             gameStatus.textContent = "El archivo no contiene puntos de interés";
         }
     } catch (error) {
-        console.error("Error loading JSON file:", error);
-        gameStatus.textContent = "Error al cargar el archivo";
+        console.error("Error al cargar JSON:", error);
+        gameStatus.textContent = "Error al cargar los datos del juego";
     }
 }
 
