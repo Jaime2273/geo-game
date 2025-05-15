@@ -1,5 +1,5 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    selectJsonFile: () => ipcRenderer.invoke('select-json-file')
+    // Puedes dejar esto vacío o eliminar el archivo si no lo usas para otras cosas
 });
