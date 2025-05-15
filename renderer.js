@@ -318,6 +318,7 @@ function completeMarker() {
         }
     }
     
+    // Resetear completamente la pregunta actual
     currentQuestion = null;
     questionPanel.classList.add('hidden');
     currentTargetIndex = -1;
