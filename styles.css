@@ -199,22 +199,3 @@ header h1 {
     transform: scale(1.02);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-/* Añade esto al final del archivo */
-#json-selector {
-    padding: 8px 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
-}
-
-#json-selector:hover {
-    border-color: #3498db;
-}
-
-.controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
