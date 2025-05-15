@@ -32,10 +32,16 @@ function initMap() {
     }).addTo(map);
 }
 
-// Cargar archivo JSON automáticamente
-async function loadJsonFile() {
+// Elementos del DOM (añade al inicio)
+const jsonSelector = document.getElementById('json-selector');
+
+// Cargar el JSON seleccionado
+async function loadSelectedJson() {
+    const selectedFile = jsonSelector.value;
+    if (!selectedFile) return;
+
     try {
-        const response = await fetch('https://raw.githubusercontent.com/Jaime2273/geo-game/main/javea.json');
+        const response = await fetch(selectedFile);
         const data = await response.json();
         
         markersData = data.markers || [];
@@ -54,6 +60,13 @@ async function loadJsonFile() {
         gameStatus.textContent = "Error al cargar los datos del juego";
     }
 }
+
+// Modifica el event listener al final del archivo:
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    jsonSelector.addEventListener('change', loadSelectedJson);
+    submitAnswerBtn.addEventListener('click', submitAnswer);
+});
 
 // Iniciar el juego
 function startGame() {
