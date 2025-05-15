@@ -32,28 +32,28 @@ function initMap() {
     }).addTo(map);
 }
 
+// Cargar archivo JSON automáticamente
 async function loadJsonFile() {
     try {
         const response = await fetch('https://raw.githubusercontent.com/Jaime2273/geo-game/main/javea.json');
         const data = await response.json();
-
+        
         markersData = data.markers || [];
-
-        gameStatus.textContent = "Juego iniciado. Encuentra el primer punto.";
-        updateStats();
-        startGame();
+        completedMarkers = [];
+        currentTargetIndex = -1;
+        currentQuestion = null;
+        
+        if (markersData.length > 0) {
+            gameStatus.textContent = `Juego cargado: ${data.name} - ${markersData.length} puntos`;
+            startGame();
+        } else {
+            gameStatus.textContent = "El archivo no contiene puntos de interés";
+        }
     } catch (error) {
-        console.error("Error al cargar el archivo JSON:", error);
+        console.error("Error al cargar JSON:", error);
         gameStatus.textContent = "Error al cargar los datos del juego";
     }
 }
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    loadJsonFile(); // carga automática
-    submitAnswerBtn.addEventListener('click', submitAnswer);
-});
 
 // Iniciar el juego
 function startGame() {
@@ -237,7 +237,6 @@ function drawPath(start, end) {
     }).addTo(map);
 }
 
-// Mostrar panel de preguntas
 function showQuestionPanel(marker) {
     if (!marker.questions || marker.questions.length === 0) {
         completeMarker();
@@ -319,7 +318,6 @@ function completeMarker() {
         }
     }
     
-    // Resetear completamente la pregunta actual
     currentQuestion = null;
     questionPanel.classList.add('hidden');
     currentTargetIndex = -1;
