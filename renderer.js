@@ -321,9 +321,15 @@ function completeMarker() {
     // Resetear completamente la pregunta actual
     currentQuestion = null;
     questionPanel.classList.add('hidden');
-    currentTargetIndex = -1;
-    lastDistance = null;
-    distanceDirection.textContent = "-";
+    
+    // Buscar el siguiente marcador más cercano
+    if (playerPosition) {
+        findClosestMarker();
+    } else {
+        currentTargetIndex = -1;
+        lastDistance = null;
+        distanceDirection.textContent = "-";
+    }
 }
 
 // Actualizar estadísticas
