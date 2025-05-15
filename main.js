@@ -23,21 +23,6 @@ function createWindow() {
     });
 }
 
-ipcMain.handle('select-json-file', async () => {
-    const { filePaths } = await dialog.showOpenDialog({
-        properties: ['openFile'],
-        filters: [
-            { name: 'JSON Files', extensions: ['json'] },
-            { name: 'All Files', extensions: ['*'] }
-        ]
-    });
-
-    if (filePaths && filePaths.length > 0) {
-        return filePaths[0];
-    }
-    return null;
-});
-
 app.on('ready', createWindow);
 
 app.on('window-all-closed', function () {
