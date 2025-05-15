@@ -32,39 +32,26 @@ function initMap() {
     }).addTo(map);
 }
 
-// Elementos del DOM (añade al inicio)
-const jsonSelector = document.getElementById('json-selector');
-
-// Cargar el JSON seleccionado
-async function loadSelectedJson() {
-    const selectedFile = jsonSelector.value;
-    if (!selectedFile) return;
-
+async function loadJsonFile() {
     try {
-        const response = await fetch(selectedFile);
+        const response = await fetch('https://raw.githubusercontent.com/Jaime2273/geo-game/main/javea.json');
         const data = await response.json();
-        
+
         markersData = data.markers || [];
-        completedMarkers = [];
-        currentTargetIndex = -1;
-        currentQuestion = null;
-        
-        if (markersData.length > 0) {
-            gameStatus.textContent = `Juego cargado: ${data.name} - ${markersData.length} puntos`;
-            startGame();
-        } else {
-            gameStatus.textContent = "El archivo no contiene puntos de interés";
-        }
+
+        gameStatus.textContent = "Juego iniciado. Encuentra el primer punto.";
+        updateStats();
+        startGame();
     } catch (error) {
-        console.error("Error al cargar JSON:", error);
+        console.error("Error al cargar el archivo JSON:", error);
         gameStatus.textContent = "Error al cargar los datos del juego";
     }
 }
 
-// Modifica el event listener al final del archivo:
+// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
-    jsonSelector.addEventListener('change', loadSelectedJson);
+    loadJsonFile(); // carga automática
     submitAnswerBtn.addEventListener('click', submitAnswer);
 });
 
