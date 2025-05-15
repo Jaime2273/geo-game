@@ -172,3 +172,30 @@ header h1 {
         border-top: 1px solid #ddd;
     }
 }
+/* Añade estas reglas al final del archivo */
+.player-icon {
+    z-index: 1000;
+}
+
+#question-timer {
+    height: 5px;
+    background-color: #3498db;
+    margin-bottom: 15px;
+    transition: width 1s linear;
+    width: 100%;
+}
+
+/* Mejoras para el movimiento del mapa */
+.leaflet-pane {
+    transition: transform 0.5s ease-out;
+}
+
+/* Mejoras para los botones de respuesta */
+.answer-option {
+    transition: background-color 0.2s ease;
+}
+
+.answer-option.selected {
+    transform: scale(1.02);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
