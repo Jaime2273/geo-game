@@ -13,15 +13,10 @@
     <div class="app-container">
         <header>
             <h1>Juego de Geolocalización</h1>
-            <!-- Cambia esta parte en el header -->
-<div class="controls">
-    <select id="json-selector">
-        <option value="">Selecciona un mapa</option>
-        <option value="javea.json">Jávea</option>
-        <option value="denia.json">Denia</option>
-    </select>
-    <div id="game-status">Esperando datos...</div>
-</div>
+            <div class="controls">
+                <button id="load-file-btn">Cargar archivo JSON</button>
+                <div id="game-status">Esperando datos...</div>
+            </div>
         </header>
         
         <div class="main-content">
@@ -37,7 +32,6 @@
                 
                 <div id="question-panel" class="hidden">
                     <h2>Pregunta</h2>
-                    <div id="question-timer"></div>
                     <div id="question-text"></div>
                     <div id="answers-container"></div>
                     <button id="submit-answer-btn" disabled>Enviar respuesta</button>
