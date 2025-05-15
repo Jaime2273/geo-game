@@ -9,6 +9,7 @@ let markersData = [];
 let completedMarkers = [];
 let watchId = null;
 let lastDistance = null;
+let currentQuestion = null;
 
 // Elementos del DOM
 const loadFileBtn = document.getElementById('load-file-btn');
@@ -31,7 +32,6 @@ function initMap() {
     }).addTo(map);
 }
 
-// Cargar archivo JSON
 // Cargar archivo JSON automáticamente
 async function loadJsonFile() {
     try {
@@ -41,6 +41,7 @@ async function loadJsonFile() {
         markersData = data.markers || [];
         completedMarkers = [];
         currentTargetIndex = -1;
+        currentQuestion = null;
         
         if (markersData.length > 0) {
             gameStatus.textContent = `Juego cargado: ${data.name} - ${markersData.length} puntos`;
@@ -56,29 +57,38 @@ async function loadJsonFile() {
 
 // Iniciar el juego
 function startGame() {
-    // Detener cualquier seguimiento anterior
     if (watchId) {
         navigator.geolocation.clearWatch(watchId);
     }
     
-    // Iniciar seguimiento de ubicación
     if (navigator.geolocation) {
         gameStatus.textContent = "Buscando tu ubicación...";
         
+        const options = {
+            enableHighAccuracy: true,
+            maximumAge: 3000,
+            timeout: 5000
+        };
+        
         watchId = navigator.geolocation.watchPosition(
             position => {
-                playerPosition = {
+                const newPos = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                updatePlayerPosition();
-                findClosestMarker();
+                
+                if (!playerPosition || 
+                    calculateDistance(playerPosition.lat, playerPosition.lng, newPos.lat, newPos.lng) > 0.01) {
+                    playerPosition = newPos;
+                    updatePlayerPosition();
+                    findClosestMarker();
+                }
             },
             error => {
                 console.error("Geolocation error:", error);
                 gameStatus.textContent = "Error al obtener la ubicación";
             },
-            { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+            options
         );
     } else {
         gameStatus.textContent = "Geolocalización no soportada por tu navegador";
@@ -97,20 +107,31 @@ function updatePlayerPosition() {
                 className: 'player-icon',
                 html: '📍',
                 iconSize: [30, 30]
-            })
+            }),
+            zIndexOffset: 1000
         }).addTo(map);
     } else {
         playerMarker.setLatLng([playerPosition.lat, playerPosition.lng]);
     }
     
-    map.panTo([playerPosition.lat, playerPosition.lng], { animate: true, duration: 1 });
+    const currentZoom = map.getZoom();
+    const playerLatLng = [playerPosition.lat, playerPosition.lng];
+    const mapCenter = map.getCenter();
+    const distanceToCenter = map.distance(mapCenter, playerLatLng);
+    
+    if (distanceToCenter > 50) {
+        map.panTo(playerLatLng, {
+            animate: true,
+            duration: 1,
+            easeLinearity: 0.25
+        });
+    }
 }
 
 // Encontrar el marcador más cercano
 function findClosestMarker() {
     if (!playerPosition || markersData.length === 0) return;
     
-    // Filtrar marcadores no completados
     const availableMarkers = markersData.filter((_, index) => !completedMarkers.includes(index));
     
     if (availableMarkers.length === 0) {
@@ -118,7 +139,6 @@ function findClosestMarker() {
         return;
     }
     
-    // Calcular distancias a todos los marcadores disponibles
     const markersWithDistances = availableMarkers.map(marker => {
         const distance = calculateDistance(
             playerPosition.lat, playerPosition.lng,
@@ -127,7 +147,6 @@ function findClosestMarker() {
         return { ...marker, distance };
     });
     
-    // Ordenar por distancia
     markersWithDistances.sort((a, b) => a.distance - b.distance);
     
     const closestMarker = markersWithDistances[0];
@@ -135,7 +154,6 @@ function findClosestMarker() {
         m.lat === closestMarker.lat && m.lng === closestMarker.lng
     );
     
-    // Actualizar el marcador objetivo si es diferente al actual
     if (currentTargetIndex !== closestMarkerIndex) {
         currentTargetIndex = closestMarkerIndex;
         setTargetMarker(closestMarker);
@@ -143,15 +161,14 @@ function findClosestMarker() {
         updateTargetDistance(closestMarker.distance);
     }
     
-    // Verificar si el jugador está lo suficientemente cerca
-    if (closestMarker.distance <= 0.03) { // 30 metros
+    if (closestMarker.distance <= 0.03) {
         showQuestionPanel(markersData[currentTargetIndex]);
     }
 }
 
 // Calcular distancia entre dos puntos en km
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radio de la Tierra en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -179,7 +196,6 @@ function setTargetMarker(marker) {
     targetName.textContent = marker.title;
     updateTargetDistance(marker.distance);
     
-    // Dibujar línea entre jugador y objetivo
     if (playerPosition) {
         drawPath(playerPosition, { lat: marker.lat, lng: marker.lng });
     }
@@ -190,7 +206,6 @@ function updateTargetDistance(distance) {
     const distanceInMeters = Math.round(distance * 1000);
     targetDistance.textContent = `${distanceInMeters} metros`;
     
-    // Mostrar si el jugador se está acercando o alejando
     if (lastDistance !== null) {
         if (distance < lastDistance) {
             distanceDirection.textContent = "Te estás acercando";
@@ -208,7 +223,6 @@ function updateTargetDistance(distance) {
 
 // Dibujar línea entre dos puntos
 function drawPath(start, end) {
-    // Limpiar cualquier ruta anterior
     map.eachLayer(layer => {
         if (layer instanceof L.Polyline) {
             map.removeLayer(layer);
@@ -230,19 +244,20 @@ function showQuestionPanel(marker) {
         return;
     }
     
-    // Seleccionar una pregunta aleatoria
-    const randomQuestion = marker.questions[Math.floor(Math.random() * marker.questions.length)];
-    questionText.textContent = randomQuestion.question;
+    if (!currentQuestion) {
+        currentQuestion = {
+            questionObj: marker.questions[0], // Usar siempre la primera pregunta para consistencia
+            answers: [
+                { text: marker.questions[0].correctAnswer, isCorrect: true },
+                ...marker.questions[0].wrongAnswers.map(answer => ({ text: answer, isCorrect: false }))
+            ].sort(() => Math.random() - 0.5)
+        };
+    }
     
-    // Mezclar respuestas
-    const answers = [
-        { text: randomQuestion.correctAnswer, isCorrect: true },
-        ...randomQuestion.wrongAnswers.map(answer => ({ text: answer, isCorrect: false }))
-    ].sort(() => Math.random() - 0.5);
-    
-    // Mostrar respuestas
+    questionText.textContent = currentQuestion.questionObj.question;
     answersContainer.innerHTML = '';
-    answers.forEach(answer => {
+    
+    currentQuestion.answers.forEach(answer => {
         const answerBtn = document.createElement('button');
         answerBtn.className = 'answer-option';
         answerBtn.textContent = answer.text;
@@ -258,12 +273,10 @@ function showQuestionPanel(marker) {
 
 // Seleccionar respuesta
 function selectAnswer(button) {
-    // Deseleccionar todas las respuestas
     document.querySelectorAll('.answer-option').forEach(btn => {
         btn.classList.remove('selected');
     });
     
-    // Seleccionar la respuesta clickeada
     button.classList.add('selected');
     submitAnswerBtn.disabled = false;
 }
@@ -290,7 +303,6 @@ function completeMarker() {
         completedMarkers.push(currentTargetIndex);
         updateStats();
         
-        // Cambiar el icono del marcador completado
         if (targetMarker) {
             targetMarker.setIcon(L.divIcon({
                 className: 'completed-icon',
@@ -300,6 +312,7 @@ function completeMarker() {
         }
     }
     
+    currentQuestion = null;
     questionPanel.classList.add('hidden');
     currentTargetIndex = -1;
     lastDistance = null;
