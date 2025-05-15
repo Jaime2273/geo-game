@@ -244,16 +244,23 @@ function showQuestionPanel(marker) {
         return;
     }
     
+    // Solo mezclar las respuestas la primera vez que se muestra esta pregunta
     if (!currentQuestion) {
+        const question = marker.questions[0]; // Usamos siempre la primera pregunta para consistencia
+        
+        // Mezclar las respuestas solo una vez y guardar ese orden
+        const shuffledAnswers = [
+            { text: question.correctAnswer, isCorrect: true },
+            ...question.wrongAnswers.map(answer => ({ text: answer, isCorrect: false }))
+        ].sort(() => Math.random() - 0.5);
+        
         currentQuestion = {
-            questionObj: marker.questions[0], // Usar siempre la primera pregunta para consistencia
-            answers: [
-                { text: marker.questions[0].correctAnswer, isCorrect: true },
-                ...marker.questions[0].wrongAnswers.map(answer => ({ text: answer, isCorrect: false }))
-            ].sort(() => Math.random() - 0.5)
+            questionObj: question,
+            answers: shuffledAnswers // Guardamos el orden mezclado
         };
     }
     
+    // Mostrar la pregunta y las respuestas (en el orden ya mezclado)
     questionText.textContent = currentQuestion.questionObj.question;
     answersContainer.innerHTML = '';
     
@@ -312,6 +319,7 @@ function completeMarker() {
         }
     }
     
+    // Resetear completamente la pregunta actual
     currentQuestion = null;
     questionPanel.classList.add('hidden');
     currentTargetIndex = -1;
